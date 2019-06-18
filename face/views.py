@@ -16,7 +16,6 @@ class RegisterView(View):
         # print(request)
         picture = request.POST.get("picture", '')
         # print(picture)
-        print(picture)
         # register_form = RegisterForm(request.POST)
         # if register_form.is_valid():
         username = request.POST.get("username", "")
@@ -88,18 +87,20 @@ class HeadLoginView(View):
 class PassWordLoginView(View):
 
     def post(self, request):
-            username = request.POST.get('username', '')
-            password = request.POST.get('password', '')
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
 
-            # 利用密码登录
-            user = authenticate(username=username, password=password)
+        # 利用密码登录
+        user = authenticate(username=username, password=password)
 
-            if user is not None:
-                # login
-                # 设置session
-                return JsonResponse({"status": 1})
-            else:
-                return JsonResponse({"status": 0})
+        if user is not None:
+            # login
+            # 设置session
+            print('登录成功')
+            return JsonResponse({"status": 1})
+        else:
+            print('登录失败')
+            return JsonResponse({"status": 0})
 
 
 
