@@ -23,5 +23,7 @@ urlpatterns = [
     path('passwordlogin/', PassWordLoginView.as_view()),
     path('getnote/', GetNote.as_view()),
     path('postnote/', PostNote.as_view()),
-    # path('upload/', UploadImageView.as_view()),
+    path('searchnote/', SearchNote.as_view()),
+    path('modifynote/', ModifyNote.as_view()),
+    path('deletenote/', DeleteNote.as_view()),
 ]

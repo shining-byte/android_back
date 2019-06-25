@@ -2,12 +2,13 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from django.views.generic.base import View
-from .forms import *
+from django.db.models import Q
 from .models import User, Note
 import face_recognition
 import base64
 import cv2
 import numpy as np
+from datetime import datetime
 
 
 # Create your views here.
@@ -103,10 +104,6 @@ class PassWordLoginView(View):
             return JsonResponse({"status": 0})
 
 
-
-
-
-
 class PostNote(View):
 
     def post(self, request):
@@ -126,16 +123,54 @@ class GetNote(View):
     def post(self, request):
         username = request.POST.get("username", '')
         user = User.objects.get(username=username)
-        note = Note.objects.filter(user=user)
-        list1 = []
+        note = Note.objects.filter(user=user).order_by('-time')
         list2 = []
         for i in note:
-            list1.append(i.id-1)
             list2.append(i.content)
-        contentdict = dict(zip(list1, list2))
-        # print(i.content)
-        # 封装成json
-        # return JsonResponse({"results":[{"no":1,"content":"xxxxxxxxxx","time":'2019-06-14 14:28:52.113955'},{"no":2,"content":"yyyyyyyyyy", "time":'2019-06-14 14:28:52.113955'},{"no":3,"content":"zzzzzzzzzz","time":'2019-06-14 14:28:52.113955'},]})
         print(list2)
         return JsonResponse({"results": list2})
-        # return JsonResponse({"results": list2})
+
+
+class SearchNote(View):
+
+    def post(self, request):
+        word = request.POST.get("word", '')
+        username = request.POST.get("username", '')
+        user = User.objects.get(username=username)
+        resluts = Note.objects.filter(Q(user_id__exact=user) and Q(content__icontains=word))
+        list = []
+        for reslut in resluts:
+            list.append(reslut.content)
+
+        return JsonResponse({"results": list})
+
+
+class ModifyNote(View):
+
+    def post(self, request):
+        username = request.POST.get('username', '')
+        no = request.POST.get('no', '')
+        content = request.POST.get('content', '')
+        no = int(no)+1
+        user = User.objects.get(username=username)
+        Note.objects.filter(user_id=user.id, id=no).update(content=content, time=datetime.now())
+        # note.save()
+        return JsonResponse({'status': 1})
+
+
+class DeleteNote(View):
+
+    def post(self, request):
+        username = request.POST.get('username', '')
+        no = request.POST.get('no', '')
+        no = int(no) +1
+        user = User.objects.get(username=username)
+        note = Note.objects.filter(user_id=user.id).order_by('-time')
+        print(no)
+        j = 0
+        for i in note:
+            j += 1
+            if j == no:
+                Note.objects.get(id=i.id).delete()
+
+        return JsonResponse({'status': 1})
